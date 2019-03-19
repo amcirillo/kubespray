@@ -95,6 +95,12 @@
 - name: kubeadm | set kubeadm version
   import_tasks: kubeadm-version.yml
 
+#On Oracle Linux the /etc/kubernetes/pki directory gets created as /etc/kubernetes/ssl
+- name: Create pki symlink
+  file: src=/etc/kubernetes/ssl dest=/etc/kubernetes/pki state=link
+  when:
+    - ansible_distribution == 'OracleLinux'
+
 - name: kubeadm | Certificate management with kubeadm
   import_tasks: kubeadm-certificate.yml
   when:

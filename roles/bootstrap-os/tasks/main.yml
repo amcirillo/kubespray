@@ -16,6 +16,9 @@
 - include_tasks: bootstrap-coreos.yml
   when: '"CoreOS" in os_release.stdout'
 
+- import_tasks: bootstrap-oraclelinux.yml
+  when: '"Oracle Linux Server" in os_release.stdout'
+
 - include_tasks: bootstrap-fedora.yml
   when: '"Fedora" in os_release.stdout'
 

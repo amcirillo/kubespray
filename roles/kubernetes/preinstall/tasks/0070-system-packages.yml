@@ -9,7 +9,7 @@
   delay: "{{ retry_stagger | random + 3 }}"
   when:
     - ansible_pkg_mgr == 'yum'
-    - ansible_distribution != 'RedHat'
+    - ansible_distribution not in ['RedHat', 'OracleLinux']
     - not is_atomic
 
 - name: Expire management cache (YUM) for Updation - Redhat
@@ -20,19 +20,19 @@
   delay: "{{ retry_stagger | random + 3 }}"
   when:
     - ansible_pkg_mgr == 'yum'
-    - ansible_distribution == 'RedHat'
+    - ansible_distribution in ['RedHat', 'OracleLinux']
     - not is_atomic
   tags: bootstrap-os
 
 - name: Update package management cache (YUM) - Redhat
-  shell: yum makecache
+  shell: yum makecache fast
   register: make_cache_output
   until: make_cache_output is succeeded
   retries: 4
   delay: "{{ retry_stagger | random + 3 }}"
   when:
     - ansible_pkg_mgr == 'yum'
-    - ansible_distribution == 'RedHat'
+    - ansible_distribution in ['RedHat', 'OracleLinux']
     - expire_cache_output.rc == 0
     - not is_atomic
   tags: bootstrap-os
@@ -105,3 +105,25 @@
   when:
     - ansible_os_family in ["ClearLinux"]
     - kube_proxy_mode == 'ipvs'
+
+- name: Enable ol7 addons for OracleLinux
+  ini_file:
+    dest: /etc/yum.repos.d/public-yum-ol7.repo # Parameterise this?
+    section: ol7_addons
+    option: enabled
+    value: 1
+  when:
+    - ansible_distribution == 'OracleLinux'
+  tags:
+    - bootstrap-os
+
+- name: Enable ol7 openstack for OracleLinux (For python packages needed)
+  ini_file:
+    dest: /etc/yum.repos.d/public-yum-ol7.repo # Parameterise this?
+    section: ol7_openstack40
+    option: enabled
+    value: 1
+  when:
+    - ansible_distribution == 'OracleLinux'
+  tags:
+    - bootstrap-os
